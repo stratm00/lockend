@@ -4,9 +4,10 @@ services:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pw
+      POSTGRES_DB: locker
       PGDATA: /var/lib/pgsql/data
     volumes:
-      - pg-data:/var/lib/pgsql/data
+     - lockend-pg-data:/var/lib/pgsql/data
     ports:
     - 5432:5432
 
@@ -19,4 +20,4 @@ services:
       - ./lockend/.env
 
 volumes:
-  pg-data:
+  lockend-pg-data:
