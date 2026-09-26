@@ -1,0 +1,22 @@
+services:
+
+  db: 
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: pw
+      PGDATA: /var/lib/pgsql/data
+    volumes:
+      - pg-data:/var/lib/pgsql/data
+    ports:
+    - 5432:5432
+
+  lockend:
+    build: ./lockend
+    image: lockend-compose:local
+    ports:
+      - 80:80      
+    env_file: 
+      - ./lockend/.env
+
+volumes:
+  pg-data:
