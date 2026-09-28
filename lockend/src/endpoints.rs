@@ -35,8 +35,6 @@ pub async fn time_travel_ts<const N: usize>(
     Json(Vec::from(history.grab_copy().await))
 }
 
-//GET
-//#[axum::debug_handler]
 pub async fn current_state<const N: usize>(
     State(mut state): State<LockerRoomState<{ N }>>,
 ) -> Json<Vec<LockerState>> {
@@ -56,7 +54,6 @@ pub struct MakeCommandParams {
     user: UserID,
 }
 use tracing::debug;
-//POST
 use axum::extract::Extension;
 #[axum::debug_handler]
 pub async fn make_command(

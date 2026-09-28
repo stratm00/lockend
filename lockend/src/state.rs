@@ -80,16 +80,20 @@ impl<const N: usize> LockerRoomState<N> {
 #[derive(Serialize)]
 pub struct LockerState {
     name: String,
-    locked: bool,
-    locked_by: Option<UserID>,
+    state: LockerStateInternal,
+}
+
+#[derive(Copy, Clone, Serialize)]
+pub enum LockerStateInternal {
+    Locked(UserID),
+    Unlocked,
 }
 
 impl Clone for LockerState {
     fn clone(&self) -> Self {
         Self {
             name: self.name.clone(),
-            locked: self.locked,
-            locked_by: self.locked_by,
+            state: self.state,
         }
     }
 }
@@ -98,29 +102,28 @@ impl LockerState {
     pub fn new_named(given_name: &str) -> Self {
         Self {
             name: given_name.to_string(),
-            locked: false,
-            locked_by: None,
+            state: LockerStateInternal::Unlocked,
         }
     }
     pub fn apply(&mut self, cmd: LockerCommand) -> Result<(), StateTransitionError> {
         match cmd {
-            LockerCommand::Actuate(user) => {
-                if self.locked_by.map(|uid| uid == user).unwrap_or(true) {
-                    if self.locked {
-                        self.locked = false;
-                        self.locked_by = None;
+            LockerCommand::Actuate(user) => match self.state {
+                LockerStateInternal::Locked(owner_uid) => {
+                    if owner_uid == user {
+                        self.state = LockerStateInternal::Unlocked;
+                        Ok(())
                     } else {
-                        self.locked = true;
-                        self.locked_by = Some(user);
+                        Err(StateTransitionError {
+                            attempt_user: user,
+                            attempt_locker: self.name.clone(),
+                        })
                     }
-                    Ok(())
-                } else {
-                    Err(StateTransitionError {
-                        attempt_user: user,
-                        attempt_locker: self.name.clone(),
-                    })
                 }
-            }
+                LockerStateInternal::Unlocked => {
+                    self.state = LockerStateInternal::Locked(user);
+                    Ok(())
+                }
+            },
         }
     }
 }

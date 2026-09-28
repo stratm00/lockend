@@ -18,7 +18,9 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     info!("tracing_subscriber::fmt::init");
     let conn_str = std::env::var("PG_CONNECTION").expect("Need PG CONNECTION");
-    let pool = sqlx::PgPool::connect(&conn_str).await.expect("CANNOT CONNECT TO PG");
+    let pool = sqlx::PgPool::connect(&conn_str)
+        .await
+        .expect("CANNOT CONNECT TO PG");
     let do_setup_tbl = std::env::var("SETUP_TABLE")
         .map(|s| s == "1")
         .unwrap_or(false);
@@ -73,7 +75,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    let tcp_lstnr = tokio::net::TcpListener::bind("0.0.0.0:8088").await.unwrap();
+    let tcp_lstnr = tokio::net::TcpListener::bind("0.0.0.0:8001").await.unwrap();
     let _ = axum::serve(tcp_lstnr, app).await;
     pool.close().await;
     Ok(())
