@@ -16,7 +16,6 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     //dotenvy::dotenv()?;
     tracing_subscriber::fmt::init();
 
-    info!("tracing_subscriber::fmt::init");
     let conn_str = std::env::var("PG_CONNECTION").expect("Need PG CONNECTION");
     let pool = sqlx::PgPool::connect(&conn_str)
         .await
@@ -61,11 +60,9 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let _listener = tokio::spawn(async move {
         loop {
             let not = listener.recv().await;
-            info!("RCVD: {not:?}");
             //Grab the latest Command, update inner state
             match db::get_latest_locker_room_command(&cloned_pool).await {
                 Ok(cmd) => {
-                    info!("gotlatestlockerroomcoommand!!!! {cmd:?}");
                     let _ = locker_room_state.apply(cmd).await;
                 }
                 Err(error) => {

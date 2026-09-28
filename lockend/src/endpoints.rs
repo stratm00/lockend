@@ -12,7 +12,6 @@ pub async fn time_travel_id<const N: usize>(
     Path(to): Path<u64>,
 ) -> Json<Vec<LockerState>> {
     //Get Commands from DB
-    info!("TIME_TRAVEL_ID");
     let commands = get_locker_room_commands_up_to_id(&pool, to.try_into().unwrap()).await;
     let mut history = LockerRoomState::<N>::new();
     history.apply_in_series(&commands).await;
@@ -25,7 +24,6 @@ pub async fn time_travel_ts<const N: usize>(
     Path(to): Path<i64>,
 ) -> Json<Vec<LockerState>> {
     //Get Commands from DB
-    info!("TIME_TRAVEL_TS");
     let odt = OffsetDateTime::from_unix_timestamp(to).unwrap();
     let pdt = PlainDateTime::new(odt.date(), odt.time());
     let commands = get_locker_room_commands_up_to_ts(&pool, pdt).await;
@@ -53,8 +51,8 @@ pub struct MakeCommandParams {
     id: LockerID,
     user: UserID,
 }
-use tracing::debug;
 use axum::extract::Extension;
+use tracing::debug;
 #[axum::debug_handler]
 pub async fn make_command(
     Extension(pool): Extension<PgPool>,
@@ -62,8 +60,6 @@ pub async fn make_command(
 ) -> &'static str {
     //Insert Command into DB, using NOTIFY to kickoff program-internal state update
     let new_command = LockerRoomCommand::Actuate(params.user, params.id);
-    debug!("new_command made");
     insert_locker_room_command_and_notify(&pool, new_command).await;
-    debug!("new_command inserted");
     "OK"
 }
