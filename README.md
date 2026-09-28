@@ -47,3 +47,6 @@ The only Command this system recognises is a metaphorical actuation of the lock 
 ## States of a Locker
 
 The state of a locker can either be unlocked or locked by a specific user.
+
+## TODO
+- Add a robust auth solution (oidc?)
